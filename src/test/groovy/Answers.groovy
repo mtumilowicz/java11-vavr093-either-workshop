@@ -14,8 +14,6 @@ import java.util.stream.Collectors
  */
 class Answers extends Specification {
     /*
-    static
-    	sequence(Iterable<? extends Either<? extends L,? extends R>> eithers)
     method
         bimap(Function<? super L,? extends X> leftMapper,
          Function<? super R,? extends Y> rightMapper)
