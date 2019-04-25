@@ -15,12 +15,8 @@ import java.util.stream.Collectors
 class Answers extends Specification {
     /*
     method
-        bimap(Function<? super L,? extends X> leftMapper,
-         Function<? super R,? extends Y> rightMapper)
         filter(Predicate<? super R> predicate)
         flatMap(Function<? super R,? extends Either<L,? extends U>> mapper)
-        	fold(Function<? super L,? extends U> leftMapper,
-    Function<? super R,? extends U> rightMapper)
     get()
     	getLeft()
     		left()
@@ -129,5 +125,43 @@ class Answers extends Specification {
         failures.isLeft()
         failures.getLeft().size() == 2 
         failures.getLeft().containsAll('Expenses in March cannot be loaded.', 'Expenses in April cannot be loaded.')
+    }
+    
+    def "square the left side or cube the right side"() {
+        given:
+        Either<Integer, Integer> left = Either.left(2)
+        Either<Integer, Integer> right = Either.right(3)
+        and:
+        Function<Integer, Integer> square = {it**2}
+        Function<Integer, Integer> cube = {it**3}
+
+        when:
+        Either<Integer, Integer> leftBimapped = left.bimap(square, cube)
+        Either<Integer, Integer> rightBimapped = right.bimap(square, cube)
+        
+        then:
+        leftBimapped.isLeft()
+        leftBimapped.getLeft() == 4
+        and:
+        rightBimapped.isRight()
+        rightBimapped.get() == 27
+    }
+
+    def "square and get the left side or cube and get the right side"() {
+        given:
+        Either<Integer, Integer> left = Either.left(2)
+        Either<Integer, Integer> right = Either.right(3)
+        and:
+        Function<Integer, Integer> square = {it**2}
+        Function<Integer, Integer> cube = {it**3}
+        
+        when:
+        Integer leftFolded = left.fold(square, cube)
+        Integer rightFolded = right.fold(square, cube)
+
+        then:
+        leftFolded == 4
+        and:
+        rightFolded == 27
     }
 }
