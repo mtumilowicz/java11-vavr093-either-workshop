@@ -1,11 +1,11 @@
+import io.vavr.control.Either
+import spock.lang.Specification 
 /**
  * Created by mtumilowicz on 2019-04-10.
  */
-class Answers {
+class Answers extends Specification {
     /*
     static
-    	left(L left)
-    	right(R right)
     	sequence(Iterable<? extends Either<? extends L,? extends R>> eithers)
         sequenceRight(Iterable<? extends Either<? extends L,? extends R>> eithers)
     method
@@ -32,5 +32,20 @@ class Answers {
      
      
      */
-    
+
+    def "create successful (Right) Either with value 1"() {
+        given:
+        Either<String, Integer> success = Either.right(1)
+
+        expect:
+        success.get() == 1
+    }
+
+    def "create failed (Left) Either with message: 'wrong status'"() {
+        given:
+        Either<String, Integer> fail = Either.left('wrong status')
+
+        expect:
+        fail.left == 'wrong status'
+    }
 }
