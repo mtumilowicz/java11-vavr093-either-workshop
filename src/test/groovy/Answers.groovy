@@ -8,14 +8,14 @@ import spock.lang.Specification
 
 import java.time.Month
 import java.util.function.Function
-import java.util.stream.Collectors 
+import java.util.stream.Collectors
+
 /**
  * Created by mtumilowicz on 2019-04-10.
  */
 class Answers extends Specification {
     /*
     method
-        filter(Predicate<? super R> predicate)
         flatMap(Function<? super R,? extends Either<L,? extends U>> mapper)
     get()
     	getLeft()
@@ -89,7 +89,7 @@ class Answers extends Specification {
         and:
         def spendingByMonthExceptional = {
             switch (it) {
-                case Month.MARCH: 
+                case Month.MARCH:
                     Either.left('Expenses in March cannot be loaded.')
                     break
                 case Month.APRIL:
@@ -123,22 +123,22 @@ class Answers extends Specification {
         average.get() == Option.some(6.5D)
         and:
         failures.isLeft()
-        failures.getLeft().size() == 2 
+        failures.getLeft().size() == 2
         failures.getLeft().containsAll('Expenses in March cannot be loaded.', 'Expenses in April cannot be loaded.')
     }
-    
+
     def "square the left side or cube the right side"() {
         given:
         Either<Integer, Integer> left = Either.left(2)
         Either<Integer, Integer> right = Either.right(3)
         and:
-        Function<Integer, Integer> square = {it**2}
-        Function<Integer, Integer> cube = {it**3}
+        Function<Integer, Integer> square = { it**2 }
+        Function<Integer, Integer> cube = { it**3 }
 
         when:
         Either<Integer, Integer> leftBimapped = left.bimap(square, cube)
         Either<Integer, Integer> rightBimapped = right.bimap(square, cube)
-        
+
         then:
         leftBimapped.isLeft()
         leftBimapped.getLeft() == 4
@@ -152,9 +152,9 @@ class Answers extends Specification {
         Either<Integer, Integer> left = Either.left(2)
         Either<Integer, Integer> right = Either.right(3)
         and:
-        Function<Integer, Integer> square = {it**2}
-        Function<Integer, Integer> cube = {it**3}
-        
+        Function<Integer, Integer> square = { it**2 }
+        Function<Integer, Integer> cube = { it**3 }
+
         when:
         Integer leftFolded = left.fold(square, cube)
         Integer rightFolded = right.fold(square, cube)
@@ -163,5 +163,23 @@ class Answers extends Specification {
         leftFolded == 4
         and:
         rightFolded == 27
+    }
+
+    def "square root"() {
+        given:
+        Either<String, Integer> negative = Either.right(-1)
+        Either<String, Integer> positive = Either.right(1)
+        Either<String, Integer> failure = Either.left("no data")
+
+        and:
+        Function<Either<String, Integer>, Option<Either<String, Double>>> square = {
+            it.filter({ it >= 0 })
+                        .map({ it.map({ Math.sqrt(it) }) })
+        }
+        
+        expect:
+        square.apply(negative).empty
+        square.apply(positive).get().get() == 1D
+        square.apply(failure).get().getLeft() == 'no data'
     }
 }
