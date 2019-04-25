@@ -1,6 +1,14 @@
+import io.vavr.collection.HashMap
 import io.vavr.collection.List
+import io.vavr.collection.Map
+import io.vavr.collection.Seq
 import io.vavr.control.Either
-import spock.lang.Specification 
+import io.vavr.control.Option
+import spock.lang.Specification
+
+import java.time.Month
+import java.util.function.Function
+import java.util.stream.Collectors 
 /**
  * Created by mtumilowicz on 2019-04-10.
  */
@@ -38,6 +46,7 @@ class Answers extends Specification {
         Either<String, Integer> success = Either.right(1)
 
         expect:
+        success.isRight()
         success.get() == 1
     }
 
@@ -46,7 +55,8 @@ class Answers extends Specification {
         Either<String, Integer> fail = Either.left('wrong status')
 
         expect:
-        fail.left == 'wrong status'
+        fail.isLeft()
+        fail.getLeft() == 'wrong status'
     }
 
     def "sum values of right eithers sequence or return the first failure"() {
@@ -69,8 +79,57 @@ class Answers extends Specification {
                 .map({ it.sum() })
 
         then:
+        sum.isRight()
         sum.get() == 10
         and:
-        fail.left == 'cannot parse integer a'
+        fail.isLeft()
+        fail.getLeft() == 'cannot parse integer a'
+    }
+
+    def "count average expenses in a year (by month) or aggregate failures"() {
+        given:
+        def spendingByMonth = {
+            Either.right(it.getValue())
+        }
+
+        and:
+        def spendingByMonthExceptional = {
+            switch (it) {
+                case Month.MARCH: 
+                    Either.left('Expenses in March cannot be loaded.')
+                    break
+                case Month.APRIL:
+                    Either.left('Expenses in April cannot be loaded.')
+                    break
+                default: Either.right(it.getValue())
+            }
+        }
+
+        and:
+        Function<Function<Month, Integer>, Map<Month, Either<String, Integer>>> expensesByMonthMap = {
+            spendingIn ->
+                HashMap.ofAll(Arrays.stream(Month.values())
+                        .collect(Collectors.toMap(
+                                Function.identity(),
+                                { month -> spendingIn(month) })))
+        }
+
+        when:
+        Seq<Either<String, Integer>> withoutFailure = expensesByMonthMap.apply(spendingByMonth).values()
+        Seq<Either<String, Integer>> withFailures = expensesByMonthMap.apply(spendingByMonthExceptional).values()
+
+        and:
+        Either<Seq<String>, Option<Double>> average = Either.sequence(withoutFailure)
+                .map({ it.average() })
+        Either<Seq<String>, Option<Double>> failures = Either.sequence(withFailures)
+                .map({ it.average() })
+
+        then:
+        average.isRight()
+        average.get() == Option.some(6.5D)
+        and:
+        failures.isLeft()
+        failures.getLeft().size() == 2 
+        failures.getLeft().containsAll('Expenses in March cannot be loaded.', 'Expenses in April cannot be loaded.')
     }
 }
