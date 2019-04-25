@@ -1,3 +1,4 @@
+import io.vavr.collection.List
 import io.vavr.control.Either
 import spock.lang.Specification 
 /**
@@ -7,7 +8,6 @@ class Answers extends Specification {
     /*
     static
     	sequence(Iterable<? extends Either<? extends L,? extends R>> eithers)
-        sequenceRight(Iterable<? extends Either<? extends L,? extends R>> eithers)
     method
         bimap(Function<? super L,? extends X> leftMapper,
          Function<? super R,? extends Y> rightMapper)
@@ -47,5 +47,30 @@ class Answers extends Specification {
 
         expect:
         fail.left == 'wrong status'
+    }
+
+    def "sum values of right eithers sequence or return the first failure"() {
+        given:
+        Either<String, Integer> n1 = Either.right(1)
+        Either<String, Integer> n2 = Either.right(2)
+        Either<String, Integer> n3 = Either.right(3)
+        Either<String, Integer> n4 = Either.right(4)
+        Either<String, Integer> failure1 = Either.left('cannot parse integer a')
+        Either<String, Integer> failure2 = Either.left('cannot parse integer b')
+
+        and:
+        List<Either<String, Integer>> from1To4 = List.of(n1, n2, n3, n4)
+        List<Either<String, Integer>> all = List.of(n1, n2, n3, n4, failure1, failure2)
+
+        when:
+        Either<String, Number> sum = Either.sequenceRight(from1To4)
+                .map({ it.sum() })
+        Either<String, Number> fail = Either.sequenceRight(all)
+                .map({ it.sum() })
+
+        then:
+        sum.get() == 10
+        and:
+        fail.left == 'cannot parse integer a'
     }
 }
