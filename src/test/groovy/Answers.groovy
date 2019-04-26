@@ -240,4 +240,21 @@ class Answers extends Specification {
         leftSquared.left()
         leftSquared.getLeft() == 4
     }
+    
+    def "Option -> Either"() {
+        given:
+        Option<Integer> some = Option.some(1)
+        Option<Integer> none = Option.none()
+        def message = 'option was empty'
+
+        when:
+        Either<String, Integer> eitherFromSome = some.toEither(message)
+        Either<String, Integer> eitherFromNone = none.toEither(message)
+        
+        then:
+        eitherFromSome.isRight()
+        eitherFromSome.get() == 1
+        eitherFromNone.isLeft()
+        eitherFromNone.getLeft() == message
+    }
 }
