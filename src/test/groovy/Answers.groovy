@@ -4,6 +4,7 @@ import io.vavr.collection.Map
 import io.vavr.collection.Seq
 import io.vavr.control.Either
 import io.vavr.control.Option
+import io.vavr.control.Try
 import spock.lang.Specification
 
 import java.time.Month
@@ -271,6 +272,22 @@ class Answers extends Specification {
         optionFromRight.defined
         optionFromRight.get() == 1
         optionFromLeft.empty
+    }
+    
+    def "Try -> Either"() {
+        given:
+        def exception = new IllegalArgumentException("a")
+        Try<Integer> success = Try.success(1)
+        Try<Integer> failure = Try.failure(exception)
 
+        when:
+        Either<Throwable, Integer> eitherFromSuccess = success.toEither()
+        Either<Throwable, Integer> eitherFromFailure = failure.toEither()
+        
+        then:
+        eitherFromSuccess.isRight()
+        eitherFromSuccess.get() == 1
+        eitherFromFailure.isLeft()
+        eitherFromFailure.getLeft() == exception
     }
 }
