@@ -10,7 +10,8 @@ import spock.lang.Specification
 import java.time.Month
 import java.util.function.Function
 import java.util.function.UnaryOperator
-import java.util.stream.Collectors 
+import java.util.stream.Collectors
+
 /**
  * Created by mtumilowicz on 2019-04-10.
  */
@@ -327,6 +328,43 @@ class Answers extends Specification {
         nonexistent.getLeft() == "user cannot be found in database, id = ${nonexistentId}"
     }
 
+    def "performing side-effects: either find in cache or find in database, log every failure"() {
+        given:
+        def logfile = []
+        def fromDatabaseId = 2
+        def fromCacheId = 1
+        def nonexistentId = 3
+
+        and:
+        Function<Integer, Either<String, String>> findById = {
+            id ->
+                CacheRepository.findById(id)
+                        .peekLeft({ logfile.add(it) })
+                        .orElse({ DatabaseRepository.findById(id) })
+                        .peekLeft({ logfile.add(it) })
+        }
+
+        when:
+        Either<String, String> fromDatabase = findById.apply(fromDatabaseId)
+        Either<String, String> fromCache = findById.apply(fromCacheId)
+        Either<String, String> nonexistent = findById.apply(nonexistentId)
+
+        then:
+        fromDatabase.isRight()
+        fromDatabase.get() == "from database, id = ${fromDatabaseId}"
+        and:
+        fromCache.isRight()
+        fromCache.get() == "from cache, id = ${fromCacheId}"
+        and:
+        nonexistent.isLeft()
+        nonexistent.getLeft() == "user cannot be found in database, id = ${nonexistentId}"
+        and:
+        logfile.size() == 3
+        logfile == ["user cannot be found in cache, id = ${fromDatabaseId}",
+                    "user cannot be found in cache, id = ${nonexistentId}",
+                    "user cannot be found in database, id = ${nonexistentId}"]
+    }
+
     def "performing side-effects: if user cannot be found in database - log message"() {
         given:
         def logfile = ""
@@ -356,7 +394,7 @@ class Answers extends Specification {
         when:
         Either<String, Integer> leftBimapped = BiMapperAnswer.bimap(left, lmap, rmap)
         Either<String, Integer> rightBimapped = BiMapperAnswer.bimap(right, lmap, rmap)
-        
+
         then:
         leftBimapped.isLeft()
         leftBimapped.getLeft() == 'sorry: + no data'
