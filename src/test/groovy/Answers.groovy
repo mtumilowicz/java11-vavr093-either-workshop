@@ -16,16 +16,14 @@ import java.util.stream.Collectors
 class Answers extends Specification {
     /*
     method
-    get()
-    	getLeft()
     		left()
+    		right()
     		map(Function<? super R,? extends U> mapper)
     		mapLeft(Function<? super L,? extends U> leftMapper)
     		orElse(Supplier<? extends Either<? extends L,? extends R>> supplier) 
     		orElseRun(Consumer<? super L> action)
     		peek(Consumer<? super R> action)
     		peekLeft(Consumer<? super L> action) 
-    			right()
     				swap()
     				toOption()
     				toTry()
