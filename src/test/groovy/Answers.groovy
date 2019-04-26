@@ -35,7 +35,7 @@ class Answers extends Specification {
         fail.getLeft() == 'wrong status'
     }
 
-    def "sum values of right eithers sequence or return the first failure"() {
+    def "sum values of right Eithers sequence or return the first failure"() {
         given:
         Either<String, Integer> n1 = Either.right(1)
         Either<String, Integer> n2 = Either.right(2)
@@ -50,9 +50,9 @@ class Answers extends Specification {
 
         when:
         Either<String, Number> sum = Either.sequenceRight(from1To4)
-                .map({ it.sum() })
+                .map { it.sum() }
         Either<String, Number> fail = Either.sequenceRight(all)
-                .map({ it.sum() })
+                .map { it.sum() }
 
         then:
         sum.isRight()
@@ -96,9 +96,9 @@ class Answers extends Specification {
 
         and:
         Either<Seq<String>, Option<Double>> average = Either.sequence(withoutFailure)
-                .map({ it.average() })
+                .map { it.average() }
         Either<Seq<String>, Option<Double>> failures = Either.sequence(withFailures)
-                .map({ it.average() })
+                .map { it.average() }
 
         then:
         average.isRight()
@@ -155,8 +155,7 @@ class Answers extends Specification {
 
         and:
         Function<Either<String, Integer>, Option<Either<String, Double>>> square = {
-            it.filter({ it >= 0 })
-                    .map({ it.map({ Math.sqrt(it) }) })
+            it.filter { it >= 0 }.map { it.map { Math.sqrt(it) } }
         }
 
         expect:
@@ -181,9 +180,9 @@ class Answers extends Specification {
 
         when:
         Either<String, Integer> withIncome = PersonRepository.findById(personWithIncome)
-                .flatMap({ estimateIncome.apply(it) })
+                .flatMap { estimateIncome.apply(it) }
         Either<String, Integer> withoutIncome = PersonRepository.findById(personWithoutIncome)
-                .flatMap({ estimateIncome.apply(it) })
+                .flatMap { estimateIncome.apply(it) }
 
         then:
         withIncome.isRight()
@@ -302,7 +301,7 @@ class Answers extends Specification {
 
         and:
         Function<Integer, Either<String, String>> findById = {
-            id -> CacheRepository.findById(id).orElse({ DatabaseRepository.findById(id) })
+            id -> CacheRepository.findById(id).orElse { DatabaseRepository.findById(id) }
         }
 
         when:
@@ -332,9 +331,9 @@ class Answers extends Specification {
         Function<Integer, Either<String, String>> findById = {
             id ->
                 CacheRepository.findById(id)
-                        .peekLeft({ logfile << it })
-                        .orElse({ DatabaseRepository.findById(id) })
-                        .peekLeft({ logfile << it })
+                        .peekLeft { logfile << it }
+                        .orElse { DatabaseRepository.findById(id) }
+                        .peekLeft { logfile << it }
         }
 
         when:
@@ -366,7 +365,7 @@ class Answers extends Specification {
 
         and:
         Function<Integer, Either<String, String>> findById = {
-            id -> DatabaseRepository.findById(id).orElseRun({ logfile << it })
+            id -> DatabaseRepository.findById(id).orElseRun { logfile << it }
         }
 
         when:
@@ -385,7 +384,7 @@ class Answers extends Specification {
 
         and:
         Function<Integer, Either<String, String>> findById = {
-            id -> DatabaseRepository.findById(id).peek({ logfile << it })
+            id -> DatabaseRepository.findById(id).peek { logfile << it }
         }
 
         when:
@@ -424,15 +423,15 @@ class Answers extends Specification {
         expect:
         PersonRequestMapper.toPerson(pr2)
                 .peek(PersonServiceAnswer.updateStats)
-                .flatMap({ PersonServiceAnswer.process(it) })
+                .flatMap { PersonServiceAnswer.process(it) }
                 .get() == Person.builder().id(2).age(22).active(true).build()
         PersonRequestMapper.toPerson(pr1)
                 .peek(PersonServiceAnswer.updateStats)
-                .flatMap({ PersonServiceAnswer.process(it) })
-                .getLeft() == "stats <= 15"        
+                .flatMap { PersonServiceAnswer.process(it) }
+                .getLeft() == "stats <= 15"
         PersonRequestMapper.toPerson(pr3)
                 .peek(PersonServiceAnswer.updateStats)
-                .flatMap({ PersonServiceAnswer.process(it) })
+                .flatMap { PersonServiceAnswer.process(it) }
                 .getLeft() == "cannot load stats for person = 3"
     }
 }
