@@ -23,12 +23,7 @@ class Answers extends Specification {
     		orElseRun(Consumer<? super L> action)
     		peek(Consumer<? super R> action)
     		peekLeft(Consumer<? super L> action) 
-    				swap()
-    				toOption()
-    				toTry()
-     
-     
-     
+    				swap()   
      */
 
     def "create successful (Right) Either with value 1"() {
@@ -273,7 +268,7 @@ class Answers extends Specification {
         optionFromRight.get() == 1
         optionFromLeft.empty
     }
-    
+
     def "Try -> Either"() {
         given:
         def exception = new IllegalArgumentException("a")
@@ -283,14 +278,14 @@ class Answers extends Specification {
         when:
         Either<Throwable, Integer> eitherFromSuccess = success.toEither()
         Either<Throwable, Integer> eitherFromFailure = failure.toEither()
-        
+
         then:
         eitherFromSuccess.isRight()
         eitherFromSuccess.get() == 1
         eitherFromFailure.isLeft()
         eitherFromFailure.getLeft() == exception
     }
-    
+
     def "Either -> Try"() {
         given:
         Either<String, Integer> right = Either.right(1)
