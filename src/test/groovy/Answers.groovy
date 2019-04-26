@@ -155,7 +155,8 @@ class Answers extends Specification {
 
         and:
         Function<Either<String, Integer>, Option<Either<String, Double>>> square = {
-            it.filter { it >= 0 }.map { it.map { Math.sqrt(it) } }
+            it.filter { it >= 0 }
+                    .map { it.map { Math.sqrt(it) } }
         }
 
         expect:
