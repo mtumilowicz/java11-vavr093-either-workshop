@@ -327,4 +327,23 @@ class Answers extends Specification {
         nonexistent.isLeft()
         nonexistent.getLeft() == "user cannot be found in database, id = ${nonexistentId}"
     }
+    
+    def "performing side-effects: if user cannot be found in database - log message"() {
+        given:
+        def logfile = ""
+        def fromDatabaseId = 2
+        def nonexistentId = 3
+
+        and:
+        Function<Integer, Either<String, String>> findById = {
+            id -> DatabaseRepository.findById(id).orElseRun({logfile += it})
+        }
+        
+        when:
+        findById.apply(nonexistentId)
+        findById.apply(fromDatabaseId)
+        
+        then:
+        logfile == "user cannot be found in database, id = ${nonexistentId}"
+    }
 }
