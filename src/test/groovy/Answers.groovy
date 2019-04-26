@@ -290,4 +290,21 @@ class Answers extends Specification {
         eitherFromFailure.isLeft()
         eitherFromFailure.getLeft() == exception
     }
+    
+    def "Either -> Try"() {
+        given:
+        Either<String, Integer> right = Either.right(1)
+        Either<String, Integer> left = Either.left('no data')
+
+        when:
+        Try<Integer> tryFromRight = right.toTry()
+        Try<Integer> tryFromLeft = left.toTry()
+
+        then:
+        tryFromRight.success
+        tryFromRight.get() == 1
+        tryFromLeft.failure
+        tryFromLeft.cause.class == NoSuchElementException
+        tryFromLeft.cause.message == 'get() on Left'
+    }
 }
