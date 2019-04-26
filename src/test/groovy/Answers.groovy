@@ -204,18 +204,18 @@ class Answers extends Specification {
         withoutIncome.isLeft()
         withoutIncome.getLeft() == "cannot estimate income for person = ${personWithoutIncome}"
     }
-    
+
     def "square right side"() {
         given:
         Either<Integer, Integer> right = Either.right(2)
         Either<Integer, Integer> left = Either.left(2)
-        
-        def square = {it**2}
+
+        def square = { it**2 }
 
         when:
         def rightSquared = right.map(square)
         def leftUntouched = left.map(square)
-        
+
         then:
         rightSquared.right()
         rightSquared.get() == 4
@@ -240,7 +240,7 @@ class Answers extends Specification {
         leftSquared.left()
         leftSquared.getLeft() == 4
     }
-    
+
     def "Option -> Either"() {
         given:
         Option<Integer> some = Option.some(1)
@@ -250,11 +250,27 @@ class Answers extends Specification {
         when:
         Either<String, Integer> eitherFromSome = some.toEither(message)
         Either<String, Integer> eitherFromNone = none.toEither(message)
-        
+
         then:
         eitherFromSome.isRight()
         eitherFromSome.get() == 1
         eitherFromNone.isLeft()
         eitherFromNone.getLeft() == message
+    }
+
+    def "Either -> Option"() {
+        given:
+        Either<String, Integer> right = Either.right(1)
+        Either<String, Integer> left = Either.left('no data')
+
+        when:
+        def optionFromRight = right.toOption()
+        def optionFromLeft = left.toOption()
+
+        then:
+        optionFromRight.defined
+        optionFromRight.get() == 1
+        optionFromLeft.empty
+
     }
 }
