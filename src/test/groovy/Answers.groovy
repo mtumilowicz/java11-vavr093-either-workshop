@@ -16,11 +16,6 @@ import java.util.stream.Collectors
  * Created by mtumilowicz on 2019-04-10.
  */
 class Answers extends Specification {
-    /*
-    method
-    		left()
-    		right()
-     */
 
     def "create successful (Right) Either with value 1"() {
         given:
