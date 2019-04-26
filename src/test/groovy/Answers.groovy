@@ -419,7 +419,7 @@ class Answers extends Specification {
         rightBimapped.get() == 4
     }
 
-    def "map request to person, send to external service with statistics, basing on the stats decide what to do next"() {
+    def "combo"() {
         given:
         def pr1 = PersonRequest.builder().id(1).age(20).build()
         def pr2 = PersonRequest.builder().id(2).age(22).build()
