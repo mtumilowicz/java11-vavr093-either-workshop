@@ -9,8 +9,7 @@ import spock.lang.Specification
 
 import java.time.Month
 import java.util.function.Function
-import java.util.stream.Collectors
-
+import java.util.stream.Collectors 
 /**
  * Created by mtumilowicz on 2019-04-10.
  */
@@ -302,7 +301,7 @@ class Answers extends Specification {
         tryFromLeft.cause.message == 'get() on Left'
     }
 
-    def "try to find in cache, if not found - then try to find in database"() {
+    def "either find in cache or find in database"() {
         given:
         def fromDatabaseId = 2
         def fromCacheId = 1
