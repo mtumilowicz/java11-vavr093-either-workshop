@@ -9,6 +9,7 @@ import spock.lang.Specification
 
 import java.time.Month
 import java.util.function.Function
+import java.util.function.UnaryOperator
 import java.util.stream.Collectors 
 /**
  * Created by mtumilowicz on 2019-04-10.
@@ -20,7 +21,6 @@ class Answers extends Specification {
     		right()
     		peek(Consumer<? super R> action) // log
     		peekLeft(Consumer<? super L> action) // log
-    				swap()   
      */
 
     def "create successful (Right) Either with value 1"() {
@@ -326,7 +326,7 @@ class Answers extends Specification {
         nonexistent.isLeft()
         nonexistent.getLeft() == "user cannot be found in database, id = ${nonexistentId}"
     }
-    
+
     def "performing side-effects: if user cannot be found in database - log message"() {
         given:
         def logfile = ""
@@ -335,14 +335,33 @@ class Answers extends Specification {
 
         and:
         Function<Integer, Either<String, String>> findById = {
-            id -> DatabaseRepository.findById(id).orElseRun({logfile += it})
+            id -> DatabaseRepository.findById(id).orElseRun({ logfile += it })
         }
-        
+
         when:
         findById.apply(nonexistentId)
         findById.apply(fromDatabaseId)
-        
+
         then:
         logfile == "user cannot be found in database, id = ${nonexistentId}"
+    }
+
+    def "implement bimap using only map and swap"() {
+        given:
+        Either<String, Integer> left = Either.left('no data')
+        Either<String, Integer> right = Either.right(2)
+        UnaryOperator<String> lmap = { "sorry: + ${it}" }
+        UnaryOperator<Integer> rmap = { it**2 }
+
+        when:
+        Either<String, Integer> leftBimapped = BiMapperAnswer.bimap(left, lmap, rmap)
+        Either<String, Integer> rightBimapped = BiMapperAnswer.bimap(right, lmap, rmap)
+        
+        then:
+        leftBimapped.isLeft()
+        leftBimapped.getLeft() == 'sorry: + no data'
+        and:
+        rightBimapped.isRight()
+        rightBimapped.get() == 4
     }
 }
