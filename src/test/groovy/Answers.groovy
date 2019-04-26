@@ -20,9 +20,9 @@ class Answers extends Specification {
     		left()
     		right()
     		orElse(Supplier<? extends Either<? extends L,? extends R>> supplier) 
-    		orElseRun(Consumer<? super L> action)
-    		peek(Consumer<? super R> action)
-    		peekLeft(Consumer<? super L> action) 
+    		orElseRun(Consumer<? super L> action) // log (function log(str) logfile = str)
+    		peek(Consumer<? super R> action) // log
+    		peekLeft(Consumer<? super L> action) // log
     				swap()   
      */
 
