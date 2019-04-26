@@ -11,7 +11,7 @@ import java.util.function.Function;
 public class PersonServiceAnswer {
     static Consumer<Person> updateStats = person -> {
     };
-    
+
     static Function<Person, Either<String, Tuple2<Person, Integer>>> loadStats = person -> {
         switch (person.getId()) {
             case 1:
@@ -23,10 +23,8 @@ public class PersonServiceAnswer {
         }
     };
 
-    static Either<String, Person> process(PersonRequest personRequest) {
-        return PersonRequestMapper.toPerson(personRequest)
-                .peek(updateStats)
-                .flatMap(loadStats)
+    static Either<String, Person> process(Person person) {
+        return loadStats.apply(person)
                 .filter(tuple -> tuple._2 > 15)
                 .getOrElse(Either.left("stats <= 15"))
                 .map(Tuple2::_1)

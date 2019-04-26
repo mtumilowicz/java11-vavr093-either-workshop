@@ -10,7 +10,8 @@ import spock.lang.Specification
 import java.time.Month
 import java.util.function.Function
 import java.util.function.UnaryOperator
-import java.util.stream.Collectors 
+import java.util.stream.Collectors
+
 /**
  * Created by mtumilowicz on 2019-04-10.
  */
@@ -380,7 +381,7 @@ class Answers extends Specification {
         then:
         logfile == ["user cannot be found in database, id = ${nonexistentId}"]
     }
-    
+
     def "performing side-effects: log success"() {
         given:
         def logfile = []
@@ -423,9 +424,15 @@ class Answers extends Specification {
         given:
         def pr1 = PersonRequest.builder().id(1).age(20).build()
         def pr2 = PersonRequest.builder().id(2).age(22).build()
-        
+
         expect:
-        PersonServiceAnswer.process(pr2).get() == Person.builder().id(2).age(22).active(true).build()
-        PersonServiceAnswer.process(pr1).getLeft() == "stats <= 15"
+        PersonRequestMapper.toPerson(pr2)
+                .peek(PersonServiceAnswer.updateStats)
+                .flatMap({ PersonServiceAnswer.process(it) })
+                .get() == Person.builder().id(2).age(22).active(true).build()
+        PersonRequestMapper.toPerson(pr1)
+                .peek(PersonServiceAnswer.updateStats)
+                .flatMap({ PersonServiceAnswer.process(it) })
+                .getLeft() == "stats <= 15"
     }
 }
