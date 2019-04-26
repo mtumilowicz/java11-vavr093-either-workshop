@@ -19,7 +19,7 @@ public class PersonServiceAnswer {
             case 2:
                 return Either.right(Tuple.of(person, 20));
             default:
-                return Either.left("cannot load stats for person = ${it.id}");
+                return Either.left("cannot load stats for person = " + person.getId());
         }
     };
 

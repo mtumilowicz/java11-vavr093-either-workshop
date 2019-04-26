@@ -424,6 +424,7 @@ class Answers extends Specification {
         given:
         def pr1 = PersonRequest.builder().id(1).age(20).build()
         def pr2 = PersonRequest.builder().id(2).age(22).build()
+        def pr3 = PersonRequest.builder().id(3).age(22).build()
 
         expect:
         PersonRequestMapper.toPerson(pr2)
@@ -433,6 +434,10 @@ class Answers extends Specification {
         PersonRequestMapper.toPerson(pr1)
                 .peek(PersonServiceAnswer.updateStats)
                 .flatMap({ PersonServiceAnswer.process(it) })
-                .getLeft() == "stats <= 15"
+                .getLeft() == "stats <= 15"        
+        PersonRequestMapper.toPerson(pr3)
+                .peek(PersonServiceAnswer.updateStats)
+                .flatMap({ PersonServiceAnswer.process(it) })
+                .getLeft() == "cannot load stats for person = 3"
     }
 }
