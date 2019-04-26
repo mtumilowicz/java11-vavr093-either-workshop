@@ -19,7 +19,6 @@ class Answers extends Specification {
     method
     		left()
     		right()
-    		peek(Consumer<? super R> action) // log
      */
 
     def "create successful (Right) Either with value 1"() {
@@ -380,6 +379,25 @@ class Answers extends Specification {
 
         then:
         logfile == ["user cannot be found in database, id = ${nonexistentId}"]
+    }
+    
+    def "performing side-effects: log success"() {
+        given:
+        def logfile = []
+        def fromDatabaseId = 2
+        def nonexistentId = 3
+
+        and:
+        Function<Integer, Either<String, String>> findById = {
+            id -> DatabaseRepository.findById(id).peek({ logfile << it })
+        }
+
+        when:
+        findById.apply(nonexistentId)
+        findById.apply(fromDatabaseId)
+
+        then:
+        logfile == ["from database, id = ${fromDatabaseId}"]
     }
 
     def "implement bimap using only map and swap"() {
