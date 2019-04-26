@@ -16,7 +16,6 @@ import java.util.stream.Collectors
 class Answers extends Specification {
     /*
     method
-        flatMap(Function<? super R,? extends Either<L,? extends U>> mapper)
     get()
     	getLeft()
     		left()
@@ -181,5 +180,32 @@ class Answers extends Specification {
         square.apply(negative).empty
         square.apply(positive).get().get() == 1D
         square.apply(failure).get().getLeft() == 'no data'
+    }
+
+    def "get person from database, and then estimate income wrapped with Either"() {
+        given:
+        Function<Person, Either<String, Integer>> estimateIncome = {
+            switch (it.id) {
+                case 1:
+                    return Either.left("cannot estimate income for person = ${it.id}" )
+                default:
+                    return Either.right(30)
+            }
+        }
+        and:
+        def personWithIncome = 2
+        def personWithoutIncome = 1
+
+        when:
+        Either<String, Integer> withIncome = PersonRepository.findById(personWithIncome)
+                .flatMap({ estimateIncome.apply(it) })
+        Either<String, Integer> withoutIncome = PersonRepository.findById(personWithoutIncome)
+                .flatMap({ estimateIncome.apply(it) })
+
+        then:
+        withIncome.isRight()
+        withIncome.get() == 30
+        withoutIncome.isLeft()
+        withoutIncome.getLeft() == "cannot estimate income for person = ${personWithoutIncome}"
     }
 }
