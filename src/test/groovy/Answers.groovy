@@ -18,7 +18,6 @@ class Answers extends Specification {
     method
     		left()
     		right()
-    		map(Function<? super R,? extends U> mapper)
     		mapLeft(Function<? super L,? extends U> leftMapper)
     		orElse(Supplier<? extends Either<? extends L,? extends R>> supplier) 
     		orElseRun(Consumer<? super L> action)
@@ -205,5 +204,23 @@ class Answers extends Specification {
         withIncome.get() == 30
         withoutIncome.isLeft()
         withoutIncome.getLeft() == "cannot estimate income for person = ${personWithoutIncome}"
+    }
+    
+    def "square right side"() {
+        given:
+        Either<Integer, Integer> right = Either.right(2)
+        Either<Integer, Integer> left = Either.left(2)
+        
+        def square = {it**2}
+
+        when:
+        def rightSquared = right.map(square)
+        def leftUntouched = left.map(square)
+        
+        then:
+        rightSquared.right()
+        rightSquared.get() == 4
+        leftUntouched.left()
+        leftUntouched.getLeft() == 2
     }
 }
