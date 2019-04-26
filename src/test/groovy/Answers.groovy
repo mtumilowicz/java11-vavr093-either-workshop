@@ -19,7 +19,6 @@ class Answers extends Specification {
     method
     		left()
     		right()
-    		orElse(Supplier<? extends Either<? extends L,? extends R>> supplier) 
     		orElseRun(Consumer<? super L> action) // log (function log(str) logfile = str)
     		peek(Consumer<? super R> action) // log
     		peekLeft(Consumer<? super L> action) // log
@@ -301,5 +300,32 @@ class Answers extends Specification {
         tryFromLeft.failure
         tryFromLeft.cause.class == NoSuchElementException
         tryFromLeft.cause.message == 'get() on Left'
+    }
+
+    def "try to find in cache, if not found - then try to find in database"() {
+        given:
+        def fromDatabaseId = 2
+        def fromCacheId = 1
+        def nonexistentId = 3
+
+        and:
+        Function<Integer, Either<String, String>> findById = {
+            id -> CacheRepository.findById(id).orElse({ DatabaseRepository.findById(id) })
+        }
+
+        when:
+        Either<String, String> fromDatabase = findById.apply(fromDatabaseId)
+        Either<String, String> fromCache = findById.apply(fromCacheId)
+        Either<String, String> nonexistent = findById.apply(nonexistentId)
+
+        then:
+        fromDatabase.isRight()
+        fromDatabase.get() == "from database, id = ${fromDatabaseId}"
+        and:
+        fromCache.isRight()
+        fromCache.get() == "from cache, id = ${fromCacheId}"
+        and:
+        nonexistent.isLeft()
+        nonexistent.getLeft() == "user cannot be found in database, id = ${nonexistentId}"
     }
 }
