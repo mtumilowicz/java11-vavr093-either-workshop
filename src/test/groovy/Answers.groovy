@@ -339,9 +339,9 @@ class Answers extends Specification {
         Function<Integer, Either<String, String>> findById = {
             id ->
                 CacheRepository.findById(id)
-                        .peekLeft({ logfile.add(it) })
+                        .peekLeft({ logfile << it })
                         .orElse({ DatabaseRepository.findById(id) })
-                        .peekLeft({ logfile.add(it) })
+                        .peekLeft({ logfile << it })
         }
 
         when:
@@ -367,13 +367,13 @@ class Answers extends Specification {
 
     def "performing side-effects: if user cannot be found in database - log message"() {
         given:
-        def logfile = ""
+        def logfile = []
         def fromDatabaseId = 2
         def nonexistentId = 3
 
         and:
         Function<Integer, Either<String, String>> findById = {
-            id -> DatabaseRepository.findById(id).orElseRun({ logfile += it })
+            id -> DatabaseRepository.findById(id).orElseRun({ logfile << it })
         }
 
         when:
@@ -381,7 +381,7 @@ class Answers extends Specification {
         findById.apply(fromDatabaseId)
 
         then:
-        logfile == "user cannot be found in database, id = ${nonexistentId}"
+        logfile == ["user cannot be found in database, id = ${nonexistentId}"]
     }
 
     def "implement bimap using only map and swap"() {
