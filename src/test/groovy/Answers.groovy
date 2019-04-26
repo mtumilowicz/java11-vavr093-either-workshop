@@ -18,7 +18,6 @@ class Answers extends Specification {
     method
     		left()
     		right()
-    		mapLeft(Function<? super L,? extends U> leftMapper)
     		orElse(Supplier<? extends Either<? extends L,? extends R>> supplier) 
     		orElseRun(Consumer<? super L> action)
     		peek(Consumer<? super R> action)
@@ -170,9 +169,9 @@ class Answers extends Specification {
         and:
         Function<Either<String, Integer>, Option<Either<String, Double>>> square = {
             it.filter({ it >= 0 })
-                        .map({ it.map({ Math.sqrt(it) }) })
+                    .map({ it.map({ Math.sqrt(it) }) })
         }
-        
+
         expect:
         square.apply(negative).empty
         square.apply(positive).get().get() == 1D
@@ -184,7 +183,7 @@ class Answers extends Specification {
         Function<Person, Either<String, Integer>> estimateIncome = {
             switch (it.id) {
                 case 1:
-                    return Either.left("cannot estimate income for person = ${it.id}" )
+                    return Either.left("cannot estimate income for person = ${it.id}")
                 default:
                     return Either.right(30)
             }
@@ -222,5 +221,23 @@ class Answers extends Specification {
         rightSquared.get() == 4
         leftUntouched.left()
         leftUntouched.getLeft() == 2
+    }
+
+    def "square left side"() {
+        given:
+        Either<Integer, Integer> right = Either.right(2)
+        Either<Integer, Integer> left = Either.left(2)
+
+        def square = { it**2 }
+
+        when:
+        def rightUntouched = right.mapLeft(square)
+        def leftSquared = left.mapLeft(square)
+
+        then:
+        rightUntouched.right()
+        rightUntouched.get() == 2
+        leftSquared.left()
+        leftSquared.getLeft() == 4
     }
 }
