@@ -18,7 +18,6 @@ class Answers extends Specification {
     method
     		left()
     		right()
-    		orElseRun(Consumer<? super L> action) // log (function log(str) logfile = str)
     		peek(Consumer<? super R> action) // log
     		peekLeft(Consumer<? super L> action) // log
     				swap()   
