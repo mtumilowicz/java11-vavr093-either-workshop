@@ -10,8 +10,7 @@ import spock.lang.Specification
 import java.time.Month
 import java.util.function.Function
 import java.util.function.UnaryOperator
-import java.util.stream.Collectors
-
+import java.util.stream.Collectors 
 /**
  * Created by mtumilowicz on 2019-04-10.
  */
@@ -21,7 +20,6 @@ class Answers extends Specification {
     		left()
     		right()
     		peek(Consumer<? super R> action) // log
-    		peekLeft(Consumer<? super L> action) // log
      */
 
     def "create successful (Right) Either with value 1"() {
@@ -401,5 +399,15 @@ class Answers extends Specification {
         and:
         rightBimapped.isRight()
         rightBimapped.get() == 4
+    }
+
+    def "map request to person, send to external service with statistics, basing on the stats decide what to do next"() {
+        given:
+        def pr1 = PersonRequest.builder().id(1).age(20).build()
+        def pr2 = PersonRequest.builder().id(2).age(22).build()
+        
+        expect:
+        PersonServiceAnswer.process(pr2).get() == Person.builder().id(2).age(22).active(true).build()
+        PersonServiceAnswer.process(pr1).getLeft() == "stats <= 15"
     }
 }

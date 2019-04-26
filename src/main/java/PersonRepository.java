@@ -14,4 +14,8 @@ class PersonRepository {
                 return Either.left("cannot find person with id = " + id);
         }
     }
+    
+    static Either<String, Person> save(Person person) {
+        return Either.right(person);
+    }
 }
