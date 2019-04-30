@@ -13,7 +13,7 @@ class Person {
     int age;
     boolean active;
     
-    Person active() {
+    Person activate() {
         return this.withActive(true);
     }
 }

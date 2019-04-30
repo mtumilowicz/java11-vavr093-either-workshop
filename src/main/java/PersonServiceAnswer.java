@@ -28,7 +28,7 @@ public class PersonServiceAnswer {
                 .filter(tuple -> tuple._2 > 15)
                 .getOrElse(Either.left("stats <= 15"))
                 .map(Tuple2::_1)
-                .map(Person::active)
+                .map(Person::activate)
                 .flatMap(PersonRepository::save);
     }
 }
