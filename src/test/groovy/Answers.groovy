@@ -147,7 +147,7 @@ class Answers extends Specification {
         rightFolded == 27
     }
 
-    def "square root"() {
+    def "count square root for x >=0 wrapped as an either"() {
         given:
         Either<String, Integer> negative = Either.right(-1)
         Either<String, Integer> positive = Either.right(1)
@@ -160,9 +160,9 @@ class Answers extends Specification {
         }
 
         expect:
-        square.apply(negative).empty
-        square.apply(positive).get().get() == 1D
-        square.apply(failure).get().getLeft() == 'no data'
+        square.apply(negative) == Option.none()
+        square.apply(positive) == Option.some(Either.right(1D))
+        square.apply(failure) == Option.some(Either.left('no data'))
     }
 
     def "get person from database, and then estimate income wrapped with Either"() {
