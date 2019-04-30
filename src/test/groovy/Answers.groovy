@@ -58,8 +58,7 @@ class Answers extends Specification {
         sum.isRight()
         sum.get() == 10
         and:
-        fail.isLeft()
-        fail.getLeft() == 'cannot parse integer a'
+        fail == Either.left('cannot parse integer a')
     }
 
     def "count average expenses in a year (by month) or aggregate failures"() {
@@ -101,8 +100,7 @@ class Answers extends Specification {
                 .map { it.average() }
 
         then:
-        average.isRight()
-        average.get() == Option.some(6.5D)
+        average == Either.right(Option.some(6.5D))
         and:
         failures.isLeft()
         failures.getLeft().size() == 2
@@ -122,11 +120,8 @@ class Answers extends Specification {
         Either<Integer, Integer> rightBimapped = right.bimap(square, cube)
 
         then:
-        leftBimapped.isLeft()
-        leftBimapped.getLeft() == 4
-        and:
-        rightBimapped.isRight()
-        rightBimapped.get() == 27
+        leftBimapped == Either.left(4)
+        rightBimapped == Either.right(27)
     }
 
     def "square and get the left side or cube and get the right side"() {
@@ -186,49 +181,43 @@ class Answers extends Specification {
                 .flatMap { estimateIncome.apply(it) }
 
         then:
-        withIncome.isRight()
-        withIncome.get() == 30
-        withoutIncome.isLeft()
-        withoutIncome.getLeft() == "cannot estimate income for person = ${personWithoutIncome}"
+        withIncome == Either.right(30)
+        withoutIncome == Either.left("cannot estimate income for person = ${personWithoutIncome}")
     }
 
-    def "square right side"() {
+    def "square the right side, if left - do nothing"() {
         given:
         Either<Integer, Integer> right = Either.right(2)
         Either<Integer, Integer> left = Either.left(2)
 
-        def square = { it**2 }
+        Function<Integer, Integer> square = { it**2 }
 
         when:
-        def rightSquared = right.map(square)
-        def leftUntouched = left.map(square)
+        Either<Integer, Integer> rightSquared = right.map(square)
+        Either<Integer, Integer> leftUntouched = left.map(square)
 
         then:
-        rightSquared.right()
-        rightSquared.get() == 4
-        leftUntouched.left()
-        leftUntouched.getLeft() == 2
+        rightSquared == Either.right(4)
+        leftUntouched == Either.left(2)
     }
 
-    def "square left side"() {
+    def "square the left side, if right - do nothing"() {
         given:
         Either<Integer, Integer> right = Either.right(2)
         Either<Integer, Integer> left = Either.left(2)
 
-        def square = { it**2 }
+        Function<Integer, Integer> square = { it**2 }
 
         when:
-        def rightUntouched = right.mapLeft(square)
-        def leftSquared = left.mapLeft(square)
+        Either<Integer, Integer> rightUntouched = right.mapLeft(square)
+        Either<Integer, Integer> leftSquared = left.mapLeft(square)
 
         then:
-        rightUntouched.right()
-        rightUntouched.get() == 2
-        leftSquared.left()
-        leftSquared.getLeft() == 4
+        rightUntouched == Either.right(2)
+        leftSquared == Either.left(4)
     }
 
-    def "Option -> Either"() {
+    def "conversion: Option -> Either"() {
         given:
         Option<Integer> some = Option.some(1)
         Option<Integer> none = Option.none()
@@ -239,30 +228,27 @@ class Answers extends Specification {
         Either<String, Integer> eitherFromNone = none.toEither(message)
 
         then:
-        eitherFromSome.isRight()
-        eitherFromSome.get() == 1
-        eitherFromNone.isLeft()
-        eitherFromNone.getLeft() == message
+        eitherFromSome == Either.right(1)
+        eitherFromNone == Either.left(message)
     }
 
-    def "Either -> Option"() {
+    def "conversion: Either -> Option"() {
         given:
         Either<String, Integer> right = Either.right(1)
         Either<String, Integer> left = Either.left('no data')
 
         when:
-        def optionFromRight = right.toOption()
-        def optionFromLeft = left.toOption()
+        Option<Integer> optionFromRight = right.toOption()
+        Option<Integer> optionFromLeft = left.toOption()
 
         then:
-        optionFromRight.defined
-        optionFromRight.get() == 1
-        optionFromLeft.empty
+        optionFromRight == Option.some(1)
+        optionFromLeft == Option.none()
     }
 
-    def "Try -> Either"() {
+    def "conversion: Try -> Either"() {
         given:
-        def exception = new IllegalArgumentException("a")
+        def exception = new IllegalArgumentException('wrong input data')
         Try<Integer> success = Try.success(1)
         Try<Integer> failure = Try.failure(exception)
 
@@ -271,13 +257,11 @@ class Answers extends Specification {
         Either<Throwable, Integer> eitherFromFailure = failure.toEither()
 
         then:
-        eitherFromSuccess.isRight()
-        eitherFromSuccess.get() == 1
-        eitherFromFailure.isLeft()
-        eitherFromFailure.getLeft() == exception
+        eitherFromSuccess == Either.right(1)
+        eitherFromFailure == Either.left(exception)
     }
 
-    def "Either -> Try"() {
+    def "conversion: Either -> Try"() {
         given:
         Either<String, Integer> right = Either.right(1)
         Either<String, Integer> left = Either.left('no data')
@@ -287,14 +271,13 @@ class Answers extends Specification {
         Try<Integer> tryFromLeft = left.toTry()
 
         then:
-        tryFromRight.success
-        tryFromRight.get() == 1
+        tryFromRight == Try.success(1)
         tryFromLeft.failure
         tryFromLeft.cause.class == NoSuchElementException
         tryFromLeft.cause.message == 'get() on Left'
     }
 
-    def "either find in cache or find in database"() {
+    def "try to find in cache, if failure - try to find in database"() {
         given:
         def fromDatabaseId = 2
         def fromCacheId = 1
@@ -311,14 +294,9 @@ class Answers extends Specification {
         Either<String, String> nonexistent = findById.apply(nonexistentId)
 
         then:
-        fromDatabase.isRight()
-        fromDatabase.get() == "from database, id = ${fromDatabaseId}"
-        and:
-        fromCache.isRight()
-        fromCache.get() == "from cache, id = ${fromCacheId}"
-        and:
-        nonexistent.isLeft()
-        nonexistent.getLeft() == "user cannot be found in database, id = ${nonexistentId}"
+        fromDatabase == Either.right('from database, id = 2')
+        fromCache == Either.right('from cache, id = 1')
+        nonexistent == Either.left('user cannot be found in database, id = 3')
     }
 
     def "performing side-effects: either find in cache or find in database, log every failure"() {
@@ -343,14 +321,9 @@ class Answers extends Specification {
         Either<String, String> nonexistent = findById.apply(nonexistentId)
 
         then:
-        fromDatabase.isRight()
-        fromDatabase.get() == "from database, id = ${fromDatabaseId}"
-        and:
-        fromCache.isRight()
-        fromCache.get() == "from cache, id = ${fromCacheId}"
-        and:
-        nonexistent.isLeft()
-        nonexistent.getLeft() == "user cannot be found in database, id = ${nonexistentId}"
+        fromDatabase == Either.right('from database, id = 2')
+        fromCache == Either.right('from cache, id = 1')
+        nonexistent == Either.left('user cannot be found in database, id = 3')
         and:
         logfile.size() == 3
         logfile == ["user cannot be found in cache, id = ${fromDatabaseId}",
@@ -398,9 +371,10 @@ class Answers extends Specification {
 
     def "implement bimap using only map and swap"() {
         given:
-        Either<String, Integer> left = Either.left('no data')
+        def message = 'no data'
+        Either<String, Integer> left = Either.left(message)
         Either<String, Integer> right = Either.right(2)
-        UnaryOperator<String> lmap = { "sorry: + ${it}" }
+        UnaryOperator<String> lmap = { "sorry: ${message}" }
         UnaryOperator<Integer> rmap = { it**2 }
 
         when:
@@ -408,11 +382,9 @@ class Answers extends Specification {
         Either<String, Integer> rightBimapped = BiMapperAnswer.bimap(right, lmap, rmap)
 
         then:
-        leftBimapped.isLeft()
-        leftBimapped.getLeft() == 'sorry: + no data'
+        leftBimapped == Either.left("sorry: ${message}")
         and:
-        rightBimapped.isRight()
-        rightBimapped.get() == 4
+        rightBimapped == Either.right(4)
     }
 
     def "combo"() {
