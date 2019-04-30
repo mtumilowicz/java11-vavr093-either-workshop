@@ -407,8 +407,8 @@ class Workshop extends Specification {
         and:
         Function<PersonRequest, Either<String, Person>> parse = {
             PersonRequestMapper.toPerson(it)
-                    .peek(PersonServiceAnswer.updateStats)
-                    .flatMap { PersonServiceAnswer.process(it) }
+                    .peek(PersonService.updateStats)
+                    .flatMap { PersonService.process(it) } // implement PersonService.updateStats 
         }
 
         expect:
