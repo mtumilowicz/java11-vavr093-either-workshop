@@ -306,7 +306,7 @@ class Answers extends Specification {
         def fromDatabaseId = 2
         def fromCacheId = 1
         def nonexistentId = 3
-        
+
         and:
         Consumer<Integer> log = {
             logfile << it
@@ -316,9 +316,9 @@ class Answers extends Specification {
         Function<Integer, Either<String, String>> findById = {
             id ->
                 CacheRepository.findById(id)
-                        .peekLeft { log }
+                        .peekLeft(log)
                         .orElse { DatabaseRepository.findById(id) }
-                        .peekLeft { log }
+                        .peekLeft(log)
         }
 
         when:
@@ -350,7 +350,7 @@ class Answers extends Specification {
 
         and:
         Function<Integer, Either<String, String>> findById = {
-            id -> DatabaseRepository.findById(id).peek { log }
+            id -> DatabaseRepository.findById(id).peek(log)
         }
 
         when:
@@ -376,7 +376,7 @@ class Answers extends Specification {
         Consumer<Integer> process = {
             id ->
                 DatabaseRepository.findById(id)
-                        .orElseRun { pushToDisplay }
+                        .orElseRun(pushToDisplay)
         }
 
         when:
@@ -407,22 +407,24 @@ class Answers extends Specification {
 
     def "combo"() {
         given:
-        def pr1 = PersonRequest.builder().id(1).age(20).build()
-        def pr2 = PersonRequest.builder().id(2).age(22).build()
-        def pr3 = PersonRequest.builder().id(3).age(22).build()
+        PersonRequest pr1 = PersonRequest.builder().id(1).age(20).build()
+        PersonRequest pr2 = PersonRequest.builder().id(2).age(22).build()
+        PersonRequest pr3 = PersonRequest.builder().id(3).age(22).build()
+
+        and:
+        Function<PersonRequest, Either<String, Person>> parse = {
+            PersonRequestMapper.toPerson(it)
+                    .peek(PersonServiceAnswer.updateStats)
+                    .flatMap { PersonServiceAnswer.process(it) }
+        }
 
         expect:
-        PersonRequestMapper.toPerson(pr2)
-                .peek(PersonServiceAnswer.updateStats)
-                .flatMap { PersonServiceAnswer.process(it) }
-                .get() == Person.builder().id(2).age(22).active(true).build()
-        PersonRequestMapper.toPerson(pr1)
-                .peek(PersonServiceAnswer.updateStats)
-                .flatMap { PersonServiceAnswer.process(it) }
-                .getLeft() == "stats <= 15"
-        PersonRequestMapper.toPerson(pr3)
-                .peek(PersonServiceAnswer.updateStats)
-                .flatMap { PersonServiceAnswer.process(it) }
-                .getLeft() == "cannot load stats for person = 3"
+        parse.apply(pr1) == Either.left('stats <= 15')
+        parse.apply(pr2) == Either.right(Person.builder()
+                .id(2)
+                .age(22)
+                .active(true)
+                .build())
+        parse.apply(pr3) == Either.left('cannot load stats for person = 3')
     }
 }
