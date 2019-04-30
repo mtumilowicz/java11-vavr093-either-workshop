@@ -8,6 +8,7 @@ import io.vavr.control.Try
 import spock.lang.Specification
 
 import java.time.Month
+import java.util.function.Consumer
 import java.util.function.Function
 import java.util.function.UnaryOperator
 import java.util.stream.Collectors
@@ -305,14 +306,19 @@ class Answers extends Specification {
         def fromDatabaseId = 2
         def fromCacheId = 1
         def nonexistentId = 3
+        
+        and:
+        Consumer<Integer> log = {
+            logfile << it
+        }
 
         and:
         Function<Integer, Either<String, String>> findById = {
             id ->
                 CacheRepository.findById(id)
-                        .peekLeft { logfile << it }
+                        .peekLeft { log }
                         .orElse { DatabaseRepository.findById(id) }
-                        .peekLeft { logfile << it }
+                        .peekLeft { log }
         }
 
         when:
@@ -331,25 +337,6 @@ class Answers extends Specification {
                     "user cannot be found in database, id = ${nonexistentId}"]
     }
 
-    def "performing side-effects: log failure"() {
-        given:
-        def logfile = []
-        def fromDatabaseId = 2
-        def nonexistentId = 3
-
-        and:
-        Function<Integer, Either<String, String>> findById = {
-            id -> DatabaseRepository.findById(id).orElseRun { logfile << it }
-        }
-
-        when:
-        findById.apply(nonexistentId)
-        findById.apply(fromDatabaseId)
-
-        then:
-        logfile == ["user cannot be found in database, id = ${nonexistentId}"]
-    }
-
     def "performing side-effects: log success"() {
         given:
         def logfile = []
@@ -357,8 +344,13 @@ class Answers extends Specification {
         def nonexistentId = 3
 
         and:
+        Consumer<Integer> log = {
+            logfile << it
+        }
+
+        and:
         Function<Integer, Either<String, String>> findById = {
-            id -> DatabaseRepository.findById(id).peek { logfile << it }
+            id -> DatabaseRepository.findById(id).peek { log }
         }
 
         when:
@@ -367,6 +359,32 @@ class Answers extends Specification {
 
         then:
         logfile == ["from database, id = ${fromDatabaseId}"]
+    }
+
+    def "performing side-effects: if left push message to the display"() {
+        given:
+        def display = []
+        def fromDatabaseId = 2
+        def nonexistentId = 3
+
+        and:
+        Consumer<Integer> pushToDisplay = {
+            display << it
+        }
+
+        and:
+        Consumer<Integer> process = {
+            id ->
+                DatabaseRepository.findById(id)
+                        .orElseRun { pushToDisplay }
+        }
+
+        when:
+        process.accept(nonexistentId)
+        process.accept(fromDatabaseId)
+
+        then:
+        display == ["user cannot be found in database, id = ${nonexistentId}"]
     }
 
     def "implement bimap using only map and swap"() {

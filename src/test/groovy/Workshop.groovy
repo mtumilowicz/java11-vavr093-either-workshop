@@ -302,12 +302,17 @@ class Workshop extends Specification {
         def nonexistentId = 3
 
         and:
+        Consumer<Integer> log = {
+            logfile << it
+        }
+        
+        and:
         Function<Integer, Either<String, String>> findById = {
             id ->
                 CacheRepository.findById(id)
-                        // hint: peekLeft, logfile
+                        // hint: peekLeft, logfile, log
                         // hint: orElse, DatabaseRepository.findById(id)
-                        // hint: peekLeft, logfile
+                        // hint: peekLeft, logfile, log
         }
 
         when:
@@ -326,25 +331,6 @@ class Workshop extends Specification {
                     "user cannot be found in database, id = ${nonexistentId}"]
     }
 
-    def "performing side-effects: if left push message to the display"() {
-        given:
-        def display = []
-        def fromDatabaseId = 2
-        def nonexistentId = 3
-
-        and:
-        Consumer<Integer> process = {
-            id -> DatabaseRepository.findById(id) // hint: orElseRun
-        }
-
-        when:
-        process.accept(nonexistentId)
-        process.accept(fromDatabaseId)
-
-        then:
-        display == ["user cannot be found in database, id = ${nonexistentId}"]
-    }
-
     def "performing side-effects: log success"() {
         given:
         def logfile = []
@@ -352,9 +338,14 @@ class Workshop extends Specification {
         def nonexistentId = 3
 
         and:
+        Consumer<Integer> log = {
+            logfile << it
+        }
+        
+        and:
         Function<Integer, Either<String, String>> findById = {
             id -> DatabaseRepository.findById(id)
-                // hint: peek
+                // hint: peek, log
         }
 
         when:
@@ -363,6 +354,30 @@ class Workshop extends Specification {
 
         then:
         logfile == ["from database, id = ${fromDatabaseId}"]
+    }
+
+    def "performing side-effects: if left push message to the display"() {
+        given:
+        def display = []
+        def fromDatabaseId = 2
+        def nonexistentId = 3
+
+        and:
+        Consumer<Integer> pushToDisplay = {
+            display << it
+        }
+        
+        and:
+        Consumer<Integer> process = {
+            id -> DatabaseRepository.findById(id) // hint: orElseRun, pushToDisplay
+        }
+
+        when:
+        process.accept(nonexistentId)
+        process.accept(fromDatabaseId)
+
+        then:
+        display == ["user cannot be found in database, id = ${nonexistentId}"]
     }
 
     def "implement bimap using only map and swap"() {
