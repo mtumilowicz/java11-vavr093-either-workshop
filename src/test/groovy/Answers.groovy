@@ -299,7 +299,7 @@ class Answers extends Specification {
         nonexistent == Either.left('user cannot be found in database, id = 3')
     }
 
-    def "performing side-effects: either find in cache or find in database, log every failure"() {
+    def "performing side-effects: try to find in cache, if failure - try to find in database, log every failure"() {
         given:
         def logfile = []
         def fromDatabaseId = 2
@@ -331,7 +331,7 @@ class Answers extends Specification {
                     "user cannot be found in database, id = ${nonexistentId}"]
     }
 
-    def "performing side-effects: if user cannot be found in database - log message"() {
+    def "performing side-effects: log failure"() {
         given:
         def logfile = []
         def fromDatabaseId = 2
