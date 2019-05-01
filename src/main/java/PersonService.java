@@ -1,5 +1,3 @@
-import io.vavr.Tuple;
-import io.vavr.Tuple2;
 import io.vavr.control.Either;
 
 import java.util.function.Consumer;
@@ -12,12 +10,12 @@ public class PersonService {
     static Consumer<Person> updateStats = person -> {
     };
 
-    static Function<Person, Either<String, Tuple2<Person, Integer>>> loadStats = person -> {
+    static Function<Person, Either<String, PersonStats>> loadStats = person -> {
         switch (person.getId()) {
             case 1:
-                return Either.right(Tuple.of(person, 10));
+                return Either.right(PersonStats.of(person, 10));
             case 2:
-                return Either.right(Tuple.of(person, 20));
+                return Either.right(PersonStats.of(person, 20));
             default:
                 return Either.left("cannot load stats for person = " + person.getId());
         }
@@ -25,10 +23,10 @@ public class PersonService {
 
     static Either<String, Person> process(Person person) {
         return null; // loadStats.apply(person)
-        // filter
-        // getOrElse
-        // map
-        // map, Person.activate
-        // flatMap, PersonRepository.save
+            // filter, PersonStats.matches
+            // getOrElse, "stats <= 15"
+            // map, PersonStats::getPerson
+            // map, Person.activate
+            // flatMap, PersonRepository.save
     }
 }
