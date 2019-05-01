@@ -21,6 +21,9 @@ public class PersonService {
         }
     };
 
+    /*
+    if stats > 15 -> activate user and save it, otherwise return "stats <= 15" message
+     */
     static Either<String, Person> process(Person person) {
         return null; // loadStats.apply(person)
             // filter, PersonStats.matches
