@@ -45,3 +45,14 @@ or return a successfully computed value
     either.toTry()
     ```
     * `Left -> NoSuchElementException("get() on Left")`
+* conversion: `List<Either<L, R>> -> Either<Seq<L>, Seq<R>>`
+    * `Either.sequence(list)`
+* conversion: `List<Either<L, R>> -> Either<Seq<L>, Seq<R>>`
+    * `Either.sequenceRight(list)`
+    * if any of the `Either` is `Left`, returns first `Left`
+* we could filter
+    * `Option<Either<L, R>> filter(Predicate<? super R> predicate)`
+* map, mapLeft, flatMap `Either<L, R>`
+    * `Either<L, U> map(f: R -> U)`
+    * `Either<L, U> flatMap(f: R -> Either<L, U>)`
+    * `Either<U, R> mapLeft(f: L -> R)`
