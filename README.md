@@ -52,6 +52,10 @@ or return a successfully computed value
     * if any of the `Either` is `Left`, returns first `Left`
 * we could filter
     * `Option<Either<L, R>> filter(Predicate<? super R> predicate)`
+* map, mapLeft, flatMap
+    * `Either<L, U> map(f: R -> U)`
+    * `Either<L, U> flatMap(f: R -> Either<L, U>)`
+    * `Either<U, R> mapLeft(f: L -> R)`
 * bimap, fold `Either<L, R>`
     * `Either<X, Y> bimap(leftMapper: L -> X, rightMapper: R -> Y)`
     * `U fold(leftMapper: L -> U, rightMapper: R -> U)`
