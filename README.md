@@ -10,5 +10,18 @@
 * answers: `Answers` (same tests as in `Workshop` but correctly solved)
 
 # theory in a nutshell
+* `Either` represents a value of two possible types.
+* An `Either` is either a `Left` or a `Right`
+* By convention the success case is `Right` and the failure is `Left`
+* models a computation that may either result in an error (for example returning some error message or even exception), 
+or return a successfully computed value
+* you can think about `Either` as a pair (Left, Right) ~ (Object, Object) that has either left or right value
+* `Try<T>` is isomorphic to `Either<Throwable, T>`
+* `Either` is a generalisation of `Try`
+* `interface Either<L, R> extends Value<R>, Serializable`
+    * `interface Value<T> extends Iterable<T>`
+* two implementations:
+    * `final class Left<L, R> implements Either<L, R>`
+    * `final class Right<L, R> implements Either<L, R>`
 
 # conclusions in a nutshell
