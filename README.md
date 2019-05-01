@@ -31,3 +31,17 @@ or return a successfully computed value
     * `final class Right<L, R> implements Either<L, R>`
     
 # conclusions in a nutshell
+* creating
+    * success: `Either.right(...)`
+    * failure: `Either.left(...)`
+* conversion: `Either<L, R> <-> Option<R>`
+    ```
+    option.toEither(L left)
+    either.toOption()
+    ```
+* conversion: `Either<L, R> <-> Try<R>`
+    ```
+    try.toEither()
+    either.toTry()
+    ```
+    * `Left -> NoSuchElementException("get() on Left")`
