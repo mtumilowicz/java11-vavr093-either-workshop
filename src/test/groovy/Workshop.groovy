@@ -11,9 +11,7 @@ import java.time.Month
 import java.util.function.Consumer
 import java.util.function.Function
 import java.util.function.UnaryOperator
-import java.util.stream.Collectors
-
-
+import java.util.stream.Collectors 
 /**
  * Created by mtumilowicz on 2019-04-30.
  */
@@ -35,6 +33,66 @@ class Workshop extends Specification {
         expect:
         -1 // verify here, hint: isLeft()
         -1 // verify here, hint: getLeft()
+    }
+
+    def "conversion: Option -> Either"() {
+        given:
+        Option<Integer> some = Option.some(1)
+        Option<Integer> none = Option.none()
+        def message = 'option was empty'
+
+        when:
+        Either<String, Integer> eitherFromSome = some // hint: toEither, message
+        Either<String, Integer> eitherFromNone = none // hint: toEither, message
+
+        then:
+        eitherFromSome == Either.right(1)
+        eitherFromNone == Either.left(message)
+    }
+
+    def "conversion: Either -> Option"() {
+        given:
+        Either<String, Integer> right = Either.right(1)
+        Either<String, Integer> left = Either.left('no data')
+
+        when:
+        Option<Integer> optionFromRight = right // hint: toOption
+        Option<Integer> optionFromLeft = left // hint: toOption
+
+        then:
+        optionFromRight == Option.some(1)
+        optionFromLeft == Option.none()
+    }
+
+    def "conversion: Try -> Either"() {
+        given:
+        def exception = new IllegalArgumentException('wrong input data')
+        Try<Integer> success = Try.success(1)
+        Try<Integer> failure = Try.failure(exception)
+
+        when:
+        Either<Throwable, Integer> eitherFromSuccess = success // hint: toEither
+        Either<Throwable, Integer> eitherFromFailure = failure // hint: toEither
+
+        then:
+        eitherFromSuccess == Either.right(1)
+        eitherFromFailure == Either.left(exception)
+    }
+
+    def "conversion: Either -> Try"() {
+        given:
+        Either<String, Integer> right = Either.right(1)
+        Either<String, Integer> left = Either.left('no data')
+
+        when:
+        Try<Integer> tryFromRight = right // hint: toTry
+        Try<Integer> tryFromLeft = left // hint: toTry
+
+        then:
+        tryFromRight == Try.success(1)
+        tryFromLeft.failure
+        tryFromLeft.cause.class == NoSuchElementException
+        tryFromLeft.cause.message == 'get() on Left'
     }
 
     def "sum values of right Eithers sequence or return the first failure"() {
@@ -210,66 +268,6 @@ class Workshop extends Specification {
         then:
         rightUntouched == Either.right(2)
         leftSquared == Either.left(4)
-    }
-
-    def "conversion: Option -> Either"() {
-        given:
-        Option<Integer> some = Option.some(1)
-        Option<Integer> none = Option.none()
-        def message = 'option was empty'
-
-        when:
-        Either<String, Integer> eitherFromSome = some // hint: toEither, message
-        Either<String, Integer> eitherFromNone = none // hint: toEither, message
-
-        then:
-        eitherFromSome == Either.right(1)
-        eitherFromNone == Either.left(message)
-    }
-
-    def "conversion: Either -> Option"() {
-        given:
-        Either<String, Integer> right = Either.right(1)
-        Either<String, Integer> left = Either.left('no data')
-
-        when:
-        Option<Integer> optionFromRight = right // hint: toOption
-        Option<Integer> optionFromLeft = left // hint: toOption
-
-        then:
-        optionFromRight == Option.some(1)
-        optionFromLeft == Option.none()
-    }
-
-    def "conversion: Try -> Either"() {
-        given:
-        def exception = new IllegalArgumentException('wrong input data')
-        Try<Integer> success = Try.success(1)
-        Try<Integer> failure = Try.failure(exception)
-
-        when:
-        Either<Throwable, Integer> eitherFromSuccess = success // hint: toEither
-        Either<Throwable, Integer> eitherFromFailure = failure // hint: toEither
-
-        then:
-        eitherFromSuccess == Either.right(1)
-        eitherFromFailure == Either.left(exception)
-    }
-
-    def "conversion: Either -> Try"() {
-        given:
-        Either<String, Integer> right = Either.right(1)
-        Either<String, Integer> left = Either.left('no data')
-
-        when:
-        Try<Integer> tryFromRight = right // hint: toTry
-        Try<Integer> tryFromLeft = left // hint: toTry
-
-        then:
-        tryFromRight == Try.success(1)
-        tryFromLeft.failure
-        tryFromLeft.cause.class == NoSuchElementException
-        tryFromLeft.cause.message == 'get() on Left'
     }
 
     def "try to find in cache, if failure - try to find in database"() {
