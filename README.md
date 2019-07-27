@@ -7,8 +7,8 @@
 * https://www.vavr.io/vavr-docs/#_either
 * https://static.javadoc.io/io.vavr/vavr/0.9.3/io/vavr/control/Either.html
 * https://github.com/mtumilowicz/java11-vavr-either
-* on the workshop we will try to fix failing `Workshop`
-* answers: `Answers` (same tests as in `Workshop` but correctly solved)
+* in the workshop we will try to fix failing test `groovy/Workshop`
+* answers: `groovy/Answers` (same tests as in `Workshop` but correctly solved)
 
 # theory in a nutshell
 * `Either` represents a value of two possible types
@@ -23,7 +23,7 @@
 * models a computation that may either result in an error (for example returning some error message or even exception), 
 or return a successfully computed value
 * you can think about `Either` as a pair `(Left, Right) ~ (Object, Object)` that has either left or right value
-* `Try<T>` is isomorphic to `Either<Throwable, T>`
+* `Try<T>` ~ `Either<Throwable, T>`
 * `Either` is a generalisation of `Try`
 * `interface Either<L, R> extends Value<R>, Serializable`
     * `interface Value<T> extends Iterable<T>`
