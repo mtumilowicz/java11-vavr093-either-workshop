@@ -7,8 +7,8 @@
 * https://www.vavr.io/vavr-docs/#_either
 * https://static.javadoc.io/io.vavr/vavr/0.9.3/io/vavr/control/Either.html
 * https://github.com/mtumilowicz/java11-vavr-either
-* in the workshop we will try to fix failing test `groovy/Workshop`
-* answers: `groovy/Answers` (same tests as in `Workshop` but correctly solved)
+* in the workshop we will try to fix failing test `test/groovy/Workshop`
+* answers: `test/groovy/Answers` (same tests as in `Workshop` but correctly solved)
 
 # theory in a nutshell
 * `Either` represents a value of two possible types
